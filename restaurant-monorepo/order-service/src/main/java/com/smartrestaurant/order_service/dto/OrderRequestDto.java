@@ -7,12 +7,12 @@ import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
-public class OrderRequest {
+public class OrderRequestDto {
     @NotNull private Long clientId;
     @NotBlank @Size(max = 200) private String  deliveryAddress;
-    @NotEmpty private List<OrderDetailRequest>  items;
+    @NotEmpty private List<OrderDetailRequestDto>  items;
 
-    public OrderRequest() {}
+    public OrderRequestDto() {}
 
     public Long getClientId() {
         return clientId;
@@ -30,11 +30,11 @@ public class OrderRequest {
         this.deliveryAddress = deliveryAddress;
     }
 
-    public List<OrderDetailRequest> getItems() {
+    public List<OrderDetailRequestDto> getItems() {
         return items;
     }
 
-    public void setItems(List<OrderDetailRequest> items) {
+    public void setItems(List<OrderDetailRequestDto> items) {
         this.items = items;
     }
 }

@@ -2,12 +2,12 @@ package com.smartrestaurant.order_service.dto;
 
 import java.math.BigDecimal;
 
-public class OrderDetailResponse {
+public class OrderDetailResponseDto {
     private Long dishId;
     private Integer quantity;
     private BigDecimal priceAtOrder;
 
-    public OrderDetailResponse(Long dishId, Integer quantity, BigDecimal priceAtOrder) {
+    public OrderDetailResponseDto(Long dishId, Integer quantity, BigDecimal priceAtOrder) {
         this.dishId = dishId;
         this.quantity = quantity;
         this.priceAtOrder = priceAtOrder;

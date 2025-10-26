@@ -6,13 +6,13 @@ import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-public class OrderResponse {
+public class OrderResponseDto {
     private Long id;
     private Long clientId;
     private OrderStatus status;
     private BigDecimal totalPrice;
     private String deliveryAddress;
-    private List<OrderDetailResponse> items;
+    private List<OrderDetailResponseDto> items;
     private ZonedDateTime placementDate;
 
     public Long getId() {
@@ -55,11 +55,11 @@ public class OrderResponse {
         this.deliveryAddress = deliveryAddress;
     }
 
-    public List<OrderDetailResponse> getItems() {
+    public List<OrderDetailResponseDto> getItems() {
         return items;
     }
 
-    public void setItems(List<OrderDetailResponse> items) {
+    public void setItems(List<OrderDetailResponseDto> items) {
         this.items = items;
     }
 
@@ -71,7 +71,7 @@ public class OrderResponse {
         this.placementDate = placementDate;
     }
 
-    public OrderResponse(Long id, Long clientId, OrderStatus status, BigDecimal totalPrice, String deliveryAddress, List<OrderDetailResponse> items, ZonedDateTime placementDate) {
+    public OrderResponseDto(Long id, Long clientId, OrderStatus status, BigDecimal totalPrice, String deliveryAddress, List<OrderDetailResponseDto> items, ZonedDateTime placementDate) {
         this.id = id;
         this.clientId = clientId;
         this.status = status;

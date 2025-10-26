@@ -3,7 +3,7 @@ package com.smartrestaurant.order_service.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
-public class OrderDetailRequest {
+public class OrderDetailRequestDto {
     @NotNull(message = "Menu item ID cannot be null")
     private Long dishId;
 
@@ -11,9 +11,9 @@ public class OrderDetailRequest {
     @NotNull(message = "Quantity is mandatory")
     private Integer quantity;
 
-    public OrderDetailRequest() {}
+    public OrderDetailRequestDto() {}
 
-    public OrderDetailRequest(Long dishId, Integer quantity) {
+    public OrderDetailRequestDto(Long dishId, Integer quantity) {
         this.dishId = dishId;
         this.quantity = quantity;
     }
