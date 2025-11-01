@@ -104,12 +104,30 @@ public  class OrderServiceImpl implements IOrderService {
 
     @Override
     public List<OrderResponseDto> getOrdersByStatus(OrderStatus status) {
-        return List.of();
+        if (status == null) {
+            throw new IllegalArgumentException("Status cannot be null");
+        }
+        return orderRepository.findByStatus(status).stream()
+                .map(OrderMapper::toResponseDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<OrderResponseDto> getLargeOrdersSortedByTotal(BigDecimal minTotal) {
-        return List.of();
+        if(minTotal == null){
+            throw new IllegalArgumentException("Minimum total cannot be null");
+        }
+
+        if (minTotal.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Minimum total cannot be negative");
+        }
+
+        List<Order> largeOrders = orderRepository.findByTotalPriceGreaterThan(minTotal);
+
+        return largeOrders.stream()
+                .sorted((o1, o2) -> o2.getTotalPrice().compareTo(o1.getTotalPrice()))
+                .map(OrderMapper::toResponseDto)
+                .collect(Collectors.toList());
     }
 
 

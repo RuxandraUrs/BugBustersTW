@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -73,6 +74,29 @@ public class OrderController {
             return ResponseEntity.ok(response);
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<OrderResponseDto>> getAllOrdersByStatus(@PathVariable String status) {
+        try {
+            List<OrderResponseDto> response = orderService.getOrdersByStatus(Enum.valueOf(com.smartrestaurant.order_service.entity.OrderStatus.class, status.toUpperCase()));
+            return ResponseEntity.ok(response);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @GetMapping("/large_orders")
+    public ResponseEntity<List<OrderResponseDto>> getLargeOrders(
+            @RequestParam(defaultValue = "100.00") BigDecimal minTotal) {
+        try {
+            List<OrderResponseDto> orders = orderService.getLargeOrdersSortedByTotal(minTotal);
+            return ResponseEntity.ok(orders);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 
