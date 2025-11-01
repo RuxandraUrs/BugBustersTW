@@ -2,6 +2,7 @@ package com.smartrestaurant.menu_service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class MenuServiceApplication {
@@ -10,4 +11,8 @@ public class MenuServiceApplication {
 		SpringApplication.run(MenuServiceApplication.class, args);
 	}
 
+//    @Bean
+//    public ModelMapper modelMapper() {
+//        return new ModelMapper();
+//    }
 }
