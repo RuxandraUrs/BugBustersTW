@@ -28,6 +28,7 @@ public class Order {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
+    @Convert(converter = OrderStatusConverter.class)
     private OrderStatus status = OrderStatus.PLACED;
 
     @Column(name = "total_price", nullable = false)
@@ -37,7 +38,7 @@ public class Order {
     private String deliveryAddress;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderDetail> orderDetails;
+    private List<OrderDetail> orderDetails = new ArrayList<>();
 
     public Order() {}
 
@@ -103,6 +104,20 @@ public class Order {
     }
 
     public void setOrderDetails(List<OrderDetail> orderDetails) {
-        this.orderDetails = orderDetails;
+        this.orderDetails.clear();
+        if (orderDetails != null) {
+            this.orderDetails.addAll(orderDetails);
+            orderDetails.forEach(detail -> detail.setOrder(this));
+        }
+    }
+
+    public void addOrderDetail(OrderDetail detail) {
+        orderDetails.add(detail);
+        detail.setOrder(this);
+    }
+
+    public void removeOrderDetail(OrderDetail detail) {
+        orderDetails.remove(detail);
+        detail.setOrder(null);
     }
 }
