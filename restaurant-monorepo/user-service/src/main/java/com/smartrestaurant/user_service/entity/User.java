@@ -1,5 +1,6 @@
 package com.smartrestaurant.user_service.entity;
 
+import com.smartrestaurant.user_service.enums.Role;
 import jakarta.persistence.*;
 
 @Entity
@@ -28,9 +29,12 @@ public class User {
     @Column(name="salary")
     private Float salary;
 
-    @ManyToOne
-    @JoinColumn(name= "role_id", nullable = false)
-    private Role role_id;
+    @Column(name="role")
+    private Role role;
+
+    public User(String name, String email, String address, String phone, Role roleName, Float salary) {}
+
+    public User(Long id, String name, String email, String address, String phone, Role roleName, Float salary) {}
 
     public User() {}
 
@@ -90,11 +94,11 @@ public class User {
         this.salary = salary;
     }
 
-    public Role getRole_id() {
-        return role_id;
+    public Role getRole() {
+        return role;
     }
 
-    public void setRole_id(Role role_id) {
-        this.role_id = role_id;
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

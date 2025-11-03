@@ -1,6 +1,7 @@
 package com.smartrestaurant.user_service.dto;
 
-import com.smartrestaurant.user_service.entity.Role;
+//import com.smartrestaurant.user_service.entity.Role;
+import com.smartrestaurant.user_service.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -14,26 +15,36 @@ public class CreateUserDTO {
     private String email;
 
     @Pattern(regexp="^(?=.*[A-Za-z])(?=.*\\d).{6,}",
-    message = "Password must have at least 6 characters and contain at least one uppercase letter and a special symbol")
+    message = "Password must have at least 6 characters and contain at least one uppercase letter and a special symbol\n")
     private String password;
 
     @NotBlank(message="Address is required")
     private String address;
 
-    @Size(min=10, max=15, message="Phone must have between 10 and 15 digits")
+    @Size(min=10, max=15, message="Phone must have between 10 and 15 digits\n")
     private String phone;
 
-    private String roleName;
+    private Role roleName;
 
+    public Float getSalary() {
+        return salary;
+    }
+
+    public void setSalary(Float salary) {
+        this.salary = salary;
+    }
+
+    private Float salary;
     public CreateUserDTO(){}
 
-    public CreateUserDTO(String name, String email, String password, String address, String phone, String roleName) {
+    public CreateUserDTO(String name, String email, String password, String address, String phone, Role roleName, Float salary) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.address = address;
         this.phone = phone;
         this.roleName = roleName;
+        this.salary = salary;
     }
 
     public String getName() {
@@ -76,14 +87,11 @@ public class CreateUserDTO {
         this.phone = phone;
     }
 
-    public String getRoleName() {
+    public Role getRoleName() {
         return roleName;
     }
 
-    public void setRoleName(String roleName) {
+    public void setRoleName(Role roleName) {
         this.roleName = roleName;
     }
-
-
-
 }
