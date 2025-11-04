@@ -1,39 +1,17 @@
 package com.smartrestaurant.order_service.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class OrderDetailResponseDto {
     private Long dishId;
     private Integer quantity;
     private BigDecimal priceAtOrder;
 
-    public OrderDetailResponseDto(Long dishId, Integer quantity, BigDecimal priceAtOrder) {
-        this.dishId = dishId;
-        this.quantity = quantity;
-        this.priceAtOrder = priceAtOrder;
-    }
-
-    public Long getDishId() {
-        return dishId;
-    }
-
-    public void setDishId(Long dishId) {
-        this.dishId = dishId;
-    }
-
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
-
-    public BigDecimal getPriceAtOrder() {
-        return priceAtOrder;
-    }
-
-    public void setPriceAtOrder(BigDecimal priceAtOrder) {
-        this.priceAtOrder = priceAtOrder;
-    }
 }

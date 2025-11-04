@@ -1,7 +1,9 @@
 package com.smartrestaurant.order_service.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
@@ -11,6 +13,9 @@ import java.util.List;
 
 @Entity
 @Table(name = "\"Order\"")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,68 +45,6 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetails = new ArrayList<>();
 
-    public Order() {}
-
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(Long clientId) {
-        this.clientId = clientId;
-    }
-
-    public Long getEmployeeId() {
-        return employeeId;
-    }
-
-    public void setEmployeeId(Long employeeId) {
-        this.employeeId = employeeId;
-    }
-
-    public ZonedDateTime getPlacementDate() {
-        return placementDate;
-    }
-
-    public void setPlacementDate(ZonedDateTime placementDate) {
-        this.placementDate = placementDate;
-    }
-
-    public OrderStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(OrderStatus status) {
-        this.status = status;
-    }
-
-    public BigDecimal getTotalPrice() {
-        return totalPrice;
-    }
-
-    public void setTotalPrice(BigDecimal totalPrice) {
-        this.totalPrice = totalPrice;
-    }
-
-    public String getDeliveryAddress() {
-        return deliveryAddress;
-    }
-
-    public void setDeliveryAddress(String deliveryAddress) {
-        this.deliveryAddress = deliveryAddress;
-    }
-
-    public List<OrderDetail> getOrderDetails() {
-        return orderDetails;
-    }
 
     public void setOrderDetails(List<OrderDetail> orderDetails) {
         this.orderDetails.clear();
@@ -111,13 +54,5 @@ public class Order {
         }
     }
 
-    public void addOrderDetail(OrderDetail detail) {
-        orderDetails.add(detail);
-        detail.setOrder(this);
-    }
 
-    public void removeOrderDetail(OrderDetail detail) {
-        orderDetails.remove(detail);
-        detail.setOrder(null);
-    }
 }

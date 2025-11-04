@@ -48,7 +48,7 @@ public class OrderController {
     @PutMapping("/{id}/update")
     public ResponseEntity<OrderResponseDto> updateOrder(@PathVariable Long id, @RequestBody OrderRequestDto request) {
         try {
-            OrderResponseDto response = orderService.updateOrder(id, request); // ← Schimbă aici
+            OrderResponseDto response = orderService.updateOrder(id, request);
             return ResponseEntity.ok(response);
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
@@ -99,14 +99,5 @@ public class OrderController {
             return ResponseEntity.badRequest().build();
         }
     }
-
-
-
-
-
-
-
-
-
 
 }
