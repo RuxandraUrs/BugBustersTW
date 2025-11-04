@@ -29,9 +29,9 @@ public class CategoryServiceImpl implements ICategoryService {
         categoryRepository.findByName(categoryDto.getName()).ifPresent(c -> {
             throw new IllegalStateException("A category with the name '" + c.getName() + "' already exists.");
         });
-
-        Category category = modelMapper.map(categoryDto, Category.class);
-        Category savedCategory = categoryRepository.save(category);
+        Category categoryToSave = new Category();
+        categoryToSave.setName(categoryDto.getName());
+        Category savedCategory = categoryRepository.save(categoryToSave);
         return modelMapper.map(savedCategory, CategoryDto.class);
     }
 
@@ -65,7 +65,7 @@ public class CategoryServiceImpl implements ICategoryService {
             throw new EntityNotFoundException("Category with ID " + id + " not found.");
         }
 
-        long dishCount = dishRepository.findByCategoryId(id).size();
+        long dishCount = dishRepository.findByCategoryIdWithCategory(id).size();
         if (dishCount > 0) {
             throw new IllegalStateException("Cannot delete category with ID " + id +
                     " because it is associated with " + dishCount + " dishes.");

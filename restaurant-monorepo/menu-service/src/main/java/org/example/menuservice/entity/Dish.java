@@ -1,18 +1,25 @@
 package org.example.menuservice.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+// Importă noile adnotări
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.Set;
 
-@Entity
-@Table(name = "Dish")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "id")
+@ToString(of = {"id", "name"})
+@Entity
+@Table(name = "Dish")
 public class Dish {
 
     @Id
@@ -34,7 +41,6 @@ public class Dish {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
-
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(

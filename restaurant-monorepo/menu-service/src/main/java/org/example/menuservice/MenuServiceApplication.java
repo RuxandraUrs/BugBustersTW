@@ -1,4 +1,4 @@
-package com.smartrestaurant.menu_service;
+package org.example.menuservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

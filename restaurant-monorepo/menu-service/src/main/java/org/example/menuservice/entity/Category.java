@@ -1,19 +1,20 @@
 package org.example.menuservice.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Set;
 
-@Entity
-@Table(name = "Category")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
+@EqualsAndHashCode(of = "id")
+@ToString(of = {"id", "name"})
+@Entity
+@Table(name = "Category")
 public class Category {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

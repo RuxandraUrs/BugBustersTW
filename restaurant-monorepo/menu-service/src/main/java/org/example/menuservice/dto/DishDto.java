@@ -15,5 +15,3 @@ public class DishDto {
     private String categoryName;
     private Set<String> ingredients;
 }
-
-

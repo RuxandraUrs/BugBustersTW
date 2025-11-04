@@ -1,5 +1,6 @@
 package org.example.menuservice.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.example.menuservice.dto.DishDto;
 import org.example.menuservice.entity.Category;
 import org.example.menuservice.entity.Dish;
@@ -7,7 +8,6 @@ import org.example.menuservice.entity.Ingredient;
 import org.example.menuservice.repository.CategoryRepository;
 import org.example.menuservice.repository.DishRepository;
 import org.example.menuservice.repository.IngredientRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -40,34 +40,39 @@ public class DishServiceImpl implements IDishService {
                 .orElseThrow(() -> new EntityNotFoundException("Category with ID " + dishDto.getCategoryId() + " not found."));
 
         Set<Ingredient> ingredients = dishDto.getIngredients().stream()
-                .map(ingredientName -> ingredientRepository.findByName(ingredientName)
+                .map(name -> ingredientRepository.findByName(name)
                         .orElseGet(() -> {
                             Ingredient newIngredient = new Ingredient();
-                            newIngredient.setName(ingredientName);
+                            newIngredient.setName(name);
                             return ingredientRepository.save(newIngredient);
                         }))
                 .collect(Collectors.toSet());
 
-        Dish dish = convertToEntity(dishDto);
+        Dish dish = modelMapper.map(dishDto, Dish.class);
+
         dish.setCategory(category);
         dish.setIngredients(ingredients);
-
+        dish.setId(null);
         Dish savedDish = dishRepository.save(dish);
+
         return convertToDto(savedDish);
     }
 
     @Override
-    public DishDto getDishById(Integer id) {
-        Dish dish = dishRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Dish with ID " + id + " not found."));
-        return convertToDto(dish);
+    @Transactional(readOnly = true)
+    public List<DishDto> getAllDishes() {
+        List<Dish> dishes = dishRepository.findAllWithCategories();
+        return dishes.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<DishDto> getAllDishes() {
-        return dishRepository.findAll().stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public DishDto getDishById(Integer id) {
+        Dish dish = dishRepository.findByIdWithCategory(id)
+                .orElseThrow(() -> new EntityNotFoundException("Dish with ID " + id + " not found."));
+        return convertToDto(dish);
     }
 
     @Override
@@ -80,12 +85,8 @@ public class DishServiceImpl implements IDishService {
                 .orElseThrow(() -> new EntityNotFoundException("Category with ID " + dishDto.getCategoryId() + " not found."));
 
         Set<Ingredient> ingredients = dishDto.getIngredients().stream()
-                .map(ingredientName -> ingredientRepository.findByName(ingredientName)
-                        .orElseGet(() -> {
-                            Ingredient newIngredient = new Ingredient();
-                            newIngredient.setName(ingredientName);
-                            return ingredientRepository.save(newIngredient);
-                        }))
+                .map(name -> ingredientRepository.findByName(name)
+                        .orElseThrow(() -> new EntityNotFoundException("Ingredient '" + name + "' not found.")))
                 .collect(Collectors.toSet());
 
         existingDish.setName(dishDto.getName());
@@ -102,38 +103,39 @@ public class DishServiceImpl implements IDishService {
     @Override
     @Transactional
     public void deleteDish(Integer id) {
-        Dish dish = dishRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Dish with ID " + id + " not found."));
-
-        dish.getIngredients().clear();
-        dishRepository.save(dish);
+        if (!dishRepository.existsById(id)) {
+            throw new EntityNotFoundException("Dish with ID " + id + " not found.");
+        }
         dishRepository.deleteById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DishDto> searchDishByName(String name) {
-        return dishRepository.findByNameContainingIgnoreCase(name).stream()
+        List<Dish> dishes = dishRepository.findByNameContainingIgnoreCaseWithCategory(name);
+        return dishes.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DishDto> filterDishes(Integer categoryId, Boolean availability) {
-        return dishRepository.filterByCriteria(categoryId, availability).stream()
+        List<Dish> dishes = dishRepository.filterByCriteriaWithCategory(categoryId, availability);
+        return dishes.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DishDto> getDishesSortedBy(String sortBy, String order) {
-        if (!List.of("name", "price", "availability").contains(sortBy)) {
-            sortBy = "name";
-        }
-
-        Sort.Direction direction = "desc".equalsIgnoreCase(order) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
         Sort sort = Sort.by(direction, sortBy);
 
-        return dishRepository.findAll(sort).stream()
+        List<Dish> dishes = dishRepository.findAll(sort);
+
+        return dishes.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
@@ -145,25 +147,14 @@ public class DishServiceImpl implements IDishService {
             dishDto.setCategoryId(dish.getCategory().getId());
             dishDto.setCategoryName(dish.getCategory().getName());
         }
+
         if (dish.getIngredients() != null) {
-            dishDto.setIngredients(dish.getIngredients().stream()
+            Set<String> ingredientNames = dish.getIngredients().stream()
                     .map(Ingredient::getName)
-                    .collect(Collectors.toSet()));
-        }
-        if (dish.getPrice() != null) {
-            dishDto.setPrice(dish.getPrice());
+                    .collect(Collectors.toSet());
+            dishDto.setIngredients(ingredientNames);
         }
 
         return dishDto;
-    }
-
-    private Dish convertToEntity(DishDto dishDto) {
-        Dish dish = modelMapper.map(dishDto, Dish.class);
-        dish.setPrice(dishDto.getPrice());
-
-        if (dishDto.getId() == null) {
-            dish.setId(null);
-        }
-        return dish;
     }
 }
