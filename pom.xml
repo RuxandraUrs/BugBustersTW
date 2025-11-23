@@ -12,6 +12,8 @@
     <module>restaurant-monorepo/menu-service</module>
     <module>restaurant-monorepo/order-service</module>
     <module>restaurant-monorepo/user-service</module>
+    <module>restaurant-monorepo/eureka-server</module>
+        <module>restaurant-monorepo/api-gateway</module>
 </modules>
 
 </project>

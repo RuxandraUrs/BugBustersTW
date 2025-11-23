@@ -1,0 +1,78 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+
+      routes:
+        # ===== ORDER SERVICE =====
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - AddRequestHeader=X-Gateway-Request, API-Gateway
+            - AddResponseHeader=X-Gateway-Response, SmartRestaurant-Gateway
+
+        # ===== MENU SERVICE =====
+        - id: menu-service
+          uri: lb://menu-service
+          predicates:
+            - Path=/api/menu/**, /api/dishes/**, /api/categories/**, /api/ingredients/**
+          filters:
+            - AddRequestHeader=X-Gateway-Request, API-Gateway
+            - AddResponseHeader=X-Gateway-Response, SmartRestaurant-Gateway
+
+        # ===== USER SERVICE =====
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/**, /api/auth/**, /api/roles/**
+          filters:
+            - AddRequestHeader=X-Gateway-Request, API-Gateway
+            - AddResponseHeader=X-Gateway-Response, SmartRestaurant-Gateway
+
+      # CORS Configuration (pentru frontend)
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
+            allowedHeaders: "*"
+            exposedHeaders:
+              - X-Order-Service-ID
+              - X-Order-Timestamp
+              - X-Menu-Content-Language
+              - X-Auth-Service-Region
+              - X-Gateway-Response
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
+
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty: INFO
