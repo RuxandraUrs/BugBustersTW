@@ -51,6 +51,16 @@ public class GatewayRoutesConfig {
                                 .rewritePath("/restaurant/user/(?<segment>.*)", "/${segment}")
                         )
                         .uri("lb://user"))
+
+                .route(p -> p
+                        .path("/restaurant/menu-service/**")
+                        .filters(f -> f
+                                .addRequestHeader("X-Service", "menu-service")
+                                .addResponseHeader("X-Service", "menu-service")
+                                .rewritePath("/restaurant/menu-service/(?<segment>.*)", "/api/menu-service/${segment}")
+                        )
+                        .uri("lb://menu-service"))
+
                 .build();
     }
 }
