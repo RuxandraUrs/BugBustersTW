@@ -48,7 +48,7 @@ public class GatewayRoutesConfig {
                         .filters(f -> f
                                 .addRequestHeader("X-Service", "user-service")
                                 .addResponseHeader("X-Service", "user-service")
-                                .rewritePath("/restaurant/user/(?<segment>.*)", "/${segment}")
+                                .rewritePath("/restaurant/users/(?<segment>.*)", "/${segment}")
                         )
                         .uri("lb://user"))
                 .build();
