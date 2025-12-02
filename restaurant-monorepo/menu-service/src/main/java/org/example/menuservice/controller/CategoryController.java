@@ -5,6 +5,7 @@ import org.example.menuservice.service.CategoryServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,30 +17,35 @@ public class CategoryController {
     @Autowired
     private CategoryServiceImpl categoryService;
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<CategoryDto> createCategory(@RequestBody CategoryDto categoryDto) {
         CategoryDto newCategory = categoryService.createCategory(categoryDto);
         return new ResponseEntity<>(newCategory, HttpStatus.CREATED);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping
     public ResponseEntity<List<CategoryDto>> getAllCategories() {
         List<CategoryDto> categories = categoryService.getAllCategories();
         return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<CategoryDto> getCategoryById(@PathVariable Integer id) {
         CategoryDto category = categoryService.getCategoryById(id);
         return new ResponseEntity<>(category, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<CategoryDto> updateCategory(@PathVariable Integer id, @RequestBody CategoryDto categoryDto) {
         CategoryDto updatedCategory = categoryService.updateCategory(id, categoryDto);
         return new ResponseEntity<>(updatedCategory, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Integer id) {
         categoryService.deleteCategory(id);

@@ -2,8 +2,8 @@ package com.smartrestaurant.api_gateway.auth;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,10 +14,9 @@ import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserSer
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.WebFilterExchange;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
 import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler;
-import reactor.core.publisher.Mono;
+import org.springframework.http.HttpMethod;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -25,21 +24,44 @@ import java.util.Set;
 
 @Configuration
 @EnableWebFluxSecurity
-public class SecurityConfig {
+@EnableReactiveMethodSecurity
+public class SecurityConfigMenuService {
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-      http
-              .csrf(ServerHttpSecurity.CsrfSpec::disable)
-              .authorizeExchange(exchanges -> exchanges
-                      .pathMatchers("/public/**", "/login/**").permitAll()
+        http
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .authorizeExchange(exchanges -> exchanges
+                        .pathMatchers("/public/**", "/login/**").permitAll()
+                        //dishes
+                        .pathMatchers(HttpMethod.POST, "/restaurant/api/dishes").hasAuthority("ROLE_ADMIN")
+                        .pathMatchers(HttpMethod.PUT, "/restaurant/api/dishes/{id}").hasAuthority("ROLE_ADMIN")
+                        .pathMatchers(HttpMethod.DELETE, "/restaurant/api/dishes/{id}").hasAuthority("ROLE_ADMIN")
+                        .pathMatchers(HttpMethod.GET, "/restaurant/api/dishes").authenticated()
+                        .pathMatchers(HttpMethod.GET, "/restaurant/api/dishes/{id}").hasAuthority("ROLE_ADMIN")
 
+                        .pathMatchers(HttpMethod.GET, "/restaurant/api/dishes/search").authenticated()
+                        .pathMatchers(HttpMethod.GET, "/restaurant/api/dishes/filter").authenticated()
+                        .pathMatchers(HttpMethod.GET, "/restaurant/api/dishes/sorted").authenticated()
 
-              .anyExchange().authenticated())
-              .oauth2Login(oauth2 -> oauth2
-                      .authenticationSuccessHandler(customAuthenticationSuccessHandler())
-              )
-              .oauth2Client(Customizer.withDefaults());
+                        // categories
+                        .pathMatchers(HttpMethod.POST, "/restaurant/api/categories").hasAuthority("ROLE_ADMIN")
+                        .pathMatchers(HttpMethod.PUT, "/restaurant/api/categories/{id}").hasAuthority("ROLE_ADMIN")
+                        .pathMatchers(HttpMethod.DELETE, "/restaurant/api/categories/{id}").hasAuthority("ROLE_ADMIN")
+                        .pathMatchers(HttpMethod.GET, "/restaurant/api/categories/{id}").hasAuthority("ROLE_ADMIN")
+                        .pathMatchers(HttpMethod.GET, "/restaurant/api/categories").authenticated()
+
+                        // ingredients
+                        .pathMatchers(HttpMethod.POST, "/restaurant/api/ingredients").hasAuthority("ROLE_ADMIN")
+                        .pathMatchers(HttpMethod.DELETE, "/restaurant/api/ingredients").hasAuthority("ROLE_ADMIN")
+                        .pathMatchers(HttpMethod.GET, "/restaurant/api/ingredients").authenticated()
+                        .pathMatchers(HttpMethod.GET, "/restaurant/api/ingredients/{id}").hasAuthority("ROLE_ADMIN")
+
+                        .anyExchange().authenticated())
+                .oauth2Login(oauth2 -> oauth2
+                        .authenticationSuccessHandler(customAuthenticationSuccessHandler())
+                )
+                .oauth2Client(Customizer.withDefaults());
 
         return http.build();
     }
@@ -69,8 +91,8 @@ public class SecurityConfig {
 
             if (email != null) {
                 if (email.equals("andreea.vilcu2@gmail.com") ||
-                        email.equals("ruxandra@student.unitbv.ro") ||
-                        email.equals("adriana@student.unitbv.ro")) {
+                        email.equals("ruxandraurs@gmail.com") ||
+                        email.equals("adrihuruba22@gmail.com")) {
 
                     System.out.println("Assigning ADMIN role to: " + email);
                     mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
