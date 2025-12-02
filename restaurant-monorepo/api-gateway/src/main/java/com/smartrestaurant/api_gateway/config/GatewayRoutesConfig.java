@@ -44,13 +44,13 @@ public class GatewayRoutesConfig {
                         )
                         .uri("lb://order"))
                 .route(p -> p
-                        .path("/restaurant/users/**")
+                        .path("/restaurant/api/users/**")
                         .filters(f -> f
                                 .addRequestHeader("X-Service", "user-service")
                                 .addResponseHeader("X-Service", "user-service")
-                                .rewritePath("/restaurant/users/(?<segment>.*)", "/${segment}")
+                                .rewritePath("/restaurant/(?<segment>.*)", "/${segment}")
                         )
-                        .uri("lb://user"))
+                        .uri("lb://user-service"))
 
                 .route(p -> p
                         .path("/restaurant/menu-service/**")
