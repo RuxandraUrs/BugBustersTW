@@ -73,6 +73,19 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Cloud Resource Manager API access-->
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-cloudresourcemanager</artifactId>
+            <version>v1-rev20240310-2.0.0</version>
+        </dependency>
+
+        <!-- Authenticating with Google services using OAuth2 -->
+        <dependency>
+            <groupId>com.google.auth</groupId>
+            <artifactId>google-auth-library-oauth2-http</artifactId>
+            <version>1.23.0</version>
+        </dependency>
 
         <!-- Spring Boot WebFlux -->
         <dependency>
