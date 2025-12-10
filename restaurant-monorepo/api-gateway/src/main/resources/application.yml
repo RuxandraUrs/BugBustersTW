@@ -7,9 +7,9 @@ spring:
       client:
         registration:
           google:
-            client-id: 235164124038-4ovbttk4qb0o9ukavgp3ukim0buosdjs.apps.googleusercontent.com
-            client-secret: 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
-            scope: openid, profile, email
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: openid, profile, email, https://www.googleapis.com/auth/cloud-platform
             redirect-uri: "http://localhost:8080/login/oauth2/code/google"
         provider:
           google:
@@ -23,11 +23,12 @@ spring:
 
   cloud:
     gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
-
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
 
       routes:
         # ===== ORDER SERVICE =====

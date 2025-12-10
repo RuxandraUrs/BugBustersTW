@@ -1,5 +1,14 @@
 package com.smartrestaurant.api_gateway.auth;
 
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.cloudresourcemanager.CloudResourceManager;
+import com.google.api.services.cloudresourcemanager.model.Binding;
+import com.google.api.services.cloudresourcemanager.model.GetIamPolicyRequest;
+import com.google.api.services.cloudresourcemanager.model.Policy;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.GoogleCredentials;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -17,14 +26,18 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
 import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler;
 
+import java.io.IOException;
 import java.net.URI;
+import java.security.GeneralSecurityException;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfigUser {
-
+    String idProject = "restaurant-480818";
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         http
@@ -70,23 +83,66 @@ public class SecurityConfigUser {
 
         return (userRequest) -> delegate.loadUser(userRequest).map(oidcUser -> {
             Set<GrantedAuthority> mappedAuthorities = new HashSet<>(oidcUser.getAuthorities());
-            String email = oidcUser.getEmail();
-
-            if (email != null) {
-                if (email.equals("andreea.vilcu2@gmail.com") ||
-                        email.equals("ruxandra@student.unitbv.ro") ||
-                        email.equals("adrihuruba22@gmail.com")) {
-
-                    System.out.println("Assigning ADMIN role to: " + email);
-                    mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-                    mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_CLIENT"));
-                } else {
-                    System.out.println("Assigning CLIENT role to: " + email);
-                    mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_CLIENT"));
-                }
+            try{
+                Set<GrantedAuthority> iamRoles = getIamRoles(userRequest, oidcUser);
+                mappedAuthorities.addAll(iamRoles);
+            }catch (GeneralSecurityException | IOException e){
+                System.err.println("IAM Error: " + e.getMessage());
+                mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_CLIENT"));
             }
 
+            System.out.println("Final Authorities: " + mappedAuthorities);
             return new DefaultOidcUser(mappedAuthorities, oidcUser.getIdToken(), oidcUser.getUserInfo());
         });
+    }
+    private Set<GrantedAuthority> getIamRoles(OidcUserRequest userRequest, OidcUser oidcUser) throws IOException, GeneralSecurityException {
+        String accessTokenValue = userRequest.getAccessToken().getTokenValue();
+        System.out.println("accessTokenValue: " + accessTokenValue);
+
+        AccessToken accessToken = new AccessToken(accessTokenValue,
+                Date.from(userRequest.getAccessToken().getExpiresAt()));
+        System.out.println("accessToken: " + accessToken.getTokenValue());
+
+        GoogleCredentials credentials = GoogleCredentials.create(accessToken);
+        System.out.println("credentials: " + credentials);
+
+        CloudResourceManager handler = new CloudResourceManager.Builder(
+                GoogleNetHttpTransport.newTrustedTransport(),
+                GsonFactory.getDefaultInstance(),
+                new HttpCredentialsAdapter(credentials))
+                .setApplicationName("RestaurantGatewayServer")
+                .build();
+
+        GetIamPolicyRequest policyRequest = new GetIamPolicyRequest();
+
+        Policy policy = handler.projects().getIamPolicy(idProject, policyRequest).execute();
+        System.out.println("policy: " + policy);
+
+        String email = oidcUser.getEmail();
+        String identifier = "user:" + email;
+
+        System.out.print("User: " + oidcUser.getEmail() + " | Mapped authorities: ");
+
+        Set<GrantedAuthority> roles = policy.getBindings().stream()
+                .filter(binding -> binding.getMembers() != null && binding.getMembers().contains(identifier))
+                .map(Binding::getRole)
+                .peek(role -> System.out.println("Role is: " + role))
+                .map(this::mapIamRolesToApplicationRoles)
+                .collect(Collectors.toSet());
+
+        return roles;
+    }
+
+    private GrantedAuthority mapIamRolesToApplicationRoles(String role) {
+        if ("roles/owner".equals(role))
+            return new SimpleGrantedAuthority("ROLE_ADMIN");
+
+        if ("roles/viewer".equals(role))
+            return new SimpleGrantedAuthority("ROLE_CLIENT");
+
+        if ("roles/editor".equals(role))
+            return new SimpleGrantedAuthority("ROLE_ADMIN");
+
+        return new SimpleGrantedAuthority("ROLE_CLIENT");
     }
 }
