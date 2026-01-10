@@ -14,10 +14,8 @@ import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserSer
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.WebFilterExchange;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
 import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler;
-import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -25,19 +23,26 @@ import java.util.Set;
 
 @Configuration
 @EnableWebFluxSecurity
-public class SecurityConfig {
+public class SecurityConfigUser {
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-      http
-              .csrf(ServerHttpSecurity.CsrfSpec::disable)
-              .authorizeExchange(exchanges -> exchanges
-                      .pathMatchers("/public/**", "/login/**").permitAll()
+        http
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .authorizeExchange(exchanges -> exchanges
+                        .pathMatchers("/public/**", "/login/**").permitAll()
 
-                      .pathMatchers(HttpMethod.POST, "/restaurant/api/orders").hasRole("CLIENT")
-                      .pathMatchers(HttpMethod.PUT, "/restaurant/api/orders/**").hasRole("ADMIN")
-                      .pathMatchers(HttpMethod.PATCH, "/restaurant/api/orders/**").hasRole("ADMIN")
-                      .pathMatchers(HttpMethod.DELETE, "/restaurant/api/orders/**").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.POST, "/restaurant/api/orders").hasRole("CLIENT")
+                        .pathMatchers(HttpMethod.PUT, "/restaurant/api/orders/**").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.PATCH, "/restaurant/api/orders/**").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.DELETE, "/restaurant/api/orders/**").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.POST, "/restaurant/api/users/create").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.GET, "/restaurant/api/users").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.PUT, "/restaurant/api/users/{id}").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.DELETE, "/restaurant/api/users/delete/{email}").hasRole("CLIENT")
+                        .pathMatchers(HttpMethod.GET, "/restaurant/api/users/clients").hasAnyRole("ADMIN")
+                        .pathMatchers(HttpMethod.GET, "/restaurant/api/users/employees/count").hasAnyRole("ADMIN")
+                        .pathMatchers(HttpMethod.GET, "/restaurant/api/users/search").hasAnyRole("ADMIN")
               .anyExchange().authenticated())
               .oauth2Login(oauth2 -> oauth2
                       .authenticationSuccessHandler(customAuthenticationSuccessHandler())
@@ -73,7 +78,7 @@ public class SecurityConfig {
             if (email != null) {
                 if (email.equals("andreea.vilcu2@gmail.com") ||
                         email.equals("ruxandra@student.unitbv.ro") ||
-                        email.equals("adriana@student.unitbv.ro")) {
+                        email.equals("adrihuruba22@gmail.com")) {
 
                     System.out.println("Assigning ADMIN role to: " + email);
                     mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
