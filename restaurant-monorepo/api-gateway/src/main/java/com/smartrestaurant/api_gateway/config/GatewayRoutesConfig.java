@@ -16,25 +16,22 @@ public class GatewayRoutesConfig {
                         .filters(f -> f
                                 .addRequestHeader("X-Service", "menu-service")
                                 .addResponseHeader("X-Service", "menu-service")
-                                .rewritePath("/restaurant/api/categories/(?<segment>.*)", "/${segment}")
-                        )
-                        .uri("lb://menu"))
+                                .rewritePath("/restaurant/(?<segment>.*)", "/${segment}")                        )
+                        .uri("lb://menu-service"))
                 .route(p -> p
                         .path("/restaurant/api/dishes/**")
                         .filters(f -> f
                                 .addRequestHeader("X-Service", "menu-service")
                                 .addResponseHeader("X-Service", "menu-service")
-                                .rewritePath("/restaurant/api/dishes/(?<segment>.*)", "/${segment}")
-                        )
-                        .uri("lb://menu"))
+                                .rewritePath("/restaurant/(?<segment>.*)", "/${segment}")                        )
+                        .uri("lb://menu-service"))
                 .route(p -> p
                         .path("/restaurant/api/ingredients/**")
                         .filters(f -> f
                                 .addRequestHeader("X-Service", "menu-service")
                                 .addResponseHeader("X-Service", "menu-service")
-                                .rewritePath("/restaurant/api/ingredients/(?<segment>.*)", "/${segment}")
-                        )
-                        .uri("lb://menu"))
+                                .rewritePath("/restaurant/(?<segment>.*)", "/${segment}")                        )
+                        .uri("lb://menu-service"))
                 .route(p -> p
                         .path("/restaurant/api/orders/**")
                         .filters(f -> f

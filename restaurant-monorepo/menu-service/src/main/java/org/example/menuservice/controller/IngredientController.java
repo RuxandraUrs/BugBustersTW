@@ -5,6 +5,7 @@ import org.example.menuservice.service.IngredientServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,24 +17,28 @@ public class IngredientController {
     @Autowired
     private IngredientServiceImpl ingredientService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<IngredientDto> createIngredient(@RequestBody IngredientDto ingredientDto) {
         IngredientDto newIngredient = ingredientService.createIngredient(ingredientDto);
         return new ResponseEntity<>(newIngredient, HttpStatus.CREATED);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping
     public ResponseEntity<List<IngredientDto>> getAllIngredients() {
         List<IngredientDto> ingredients = ingredientService.getAllIngredients();
         return new ResponseEntity<>(ingredients, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<IngredientDto> getIngredientById(@PathVariable Integer id) {
         IngredientDto ingredient = ingredientService.getIngredientById(id);
         return new ResponseEntity<>(ingredient, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteIngredient(@PathVariable Integer id) {
         ingredientService.deleteIngredient(id);
