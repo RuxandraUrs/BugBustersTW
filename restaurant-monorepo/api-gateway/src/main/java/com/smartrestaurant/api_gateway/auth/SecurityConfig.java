@@ -34,7 +34,10 @@ public class SecurityConfig {
               .authorizeExchange(exchanges -> exchanges
                       .pathMatchers("/public/**", "/login/**").permitAll()
 
-
+                      .pathMatchers(HttpMethod.POST, "/restaurant/api/orders").hasRole("CLIENT")
+                      .pathMatchers(HttpMethod.PUT, "/restaurant/api/orders/**").hasRole("ADMIN")
+                      .pathMatchers(HttpMethod.PATCH, "/restaurant/api/orders/**").hasRole("ADMIN")
+                      .pathMatchers(HttpMethod.DELETE, "/restaurant/api/orders/**").hasRole("ADMIN")
               .anyExchange().authenticated())
               .oauth2Login(oauth2 -> oauth2
                       .authenticationSuccessHandler(customAuthenticationSuccessHandler())
