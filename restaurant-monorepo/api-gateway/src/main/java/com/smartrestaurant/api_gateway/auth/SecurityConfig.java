@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -71,11 +72,14 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.GET, "/restaurant/api/users").hasRole("ADMIN")
                         .pathMatchers(HttpMethod.PUT, "/restaurant/api/users/{id}").hasRole("ADMIN")
                         .pathMatchers(HttpMethod.DELETE, "/restaurant/api/users/delete/{email}").hasRole("CLIENT")
-                        .pathMatchers(HttpMethod.GET, "/restaurant/api/users/clients").hasRole("ADMIN") // am corectat din hasAnyRole("ADMIN")
+                        .pathMatchers(HttpMethod.GET, "/restaurant/api/users/clients").hasRole("ADMIN")
                         .pathMatchers(HttpMethod.GET, "/restaurant/api/users/employees/count").hasRole("ADMIN")
                         .pathMatchers(HttpMethod.GET, "/restaurant/api/users/search").hasRole("ADMIN")
 
-
+                        .pathMatchers(HttpMethod.GET, "/api/menu/dashboard/orders").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.GET, "/api/menu/dashboard/my-orders").authenticated()
+                        .pathMatchers(HttpMethod.GET, "/api/menu/dashboard/users/clients").authenticated()
+                        .pathMatchers(HttpMethod.GET, "/api/menu/dashboard/users/employees-count").hasRole("ADMIN")
                         .anyExchange().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
