@@ -16,6 +16,7 @@ public interface IUserService {
     UserDTO updateUser(Long id, UserDTO userDTO); //Update //Update
     boolean deleteUser(String email);  //Delete
 
+
     //Extra endpoints
     List<UserDTO> getClients();
     Long countEmployees();

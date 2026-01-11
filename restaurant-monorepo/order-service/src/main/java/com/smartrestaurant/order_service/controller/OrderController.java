@@ -1,5 +1,6 @@
 package com.smartrestaurant.order_service.controller;
 
+import com.smartrestaurant.order_service.dto.OrderDetailedResponseDto;
 import com.smartrestaurant.order_service.dto.OrderRequestDto;
 import com.smartrestaurant.order_service.dto.OrderResponseDto;
 import com.smartrestaurant.order_service.service.OrderServiceImpl;
@@ -98,6 +99,21 @@ public class OrderController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/{id}/details")
+    public ResponseEntity<OrderDetailedResponseDto> getOrderDetails(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderDetails(id));
+    }
+
+    @GetMapping("/search/client")
+    public ResponseEntity<List<OrderResponseDto>> searchOrdersByClient(@RequestParam String name) {
+        return ResponseEntity.ok(orderService.getOrdersByClientName(name));
+    }
+
+    @GetMapping("/search/dish")
+    public ResponseEntity<List<OrderResponseDto>> searchOrdersByDish(@RequestParam String name) {
+        return ResponseEntity.ok(orderService.getOrdersByDishName(name));
     }
 
 }
