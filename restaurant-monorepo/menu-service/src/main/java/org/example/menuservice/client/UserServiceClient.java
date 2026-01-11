@@ -4,6 +4,7 @@ import org.example.menuservice.config.FeignClientInterceptor;
 import org.example.menuservice.dto.UserResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -15,4 +16,7 @@ public interface UserServiceClient {
 
     @GetMapping("/api/users/employees/count")
     Long countEmployees();
+
+    @GetMapping("/api/users/search")
+    List<UserResponseDto> searchUsers(@RequestParam("name") String name);
 }

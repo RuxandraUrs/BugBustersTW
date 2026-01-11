@@ -78,7 +78,7 @@ public class SecurityConfig {
 
                         .pathMatchers(HttpMethod.GET, "/api/menu/dashboard/orders").hasRole("ADMIN")
                         .pathMatchers(HttpMethod.GET, "/api/menu/dashboard/my-orders").authenticated()
-                        .pathMatchers(HttpMethod.GET, "/api/menu/dashboard/users/clients").authenticated()
+                        .pathMatchers(HttpMethod.GET, "/api/menu/dashboard/users/search").authenticated()
                         .pathMatchers(HttpMethod.GET, "/api/menu/dashboard/users/employees-count").hasRole("ADMIN")
                         .anyExchange().authenticated()
                 )

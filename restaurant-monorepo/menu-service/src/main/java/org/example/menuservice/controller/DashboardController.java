@@ -34,11 +34,11 @@ public class DashboardController {
         return ResponseEntity.ok(dashboardService.getOrdersForClient(name));
     }
 
-    // http://localhost:8080/api/menu/dashboard/users/clients
+    // http://localhost:8080/api/menu/dashboard/users/search?name=Diana
     @GetMapping("/users/search")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<UserResponseDto>> getClients() {
-        return ResponseEntity.ok(dashboardService.getAllClients());
+    public ResponseEntity<List<UserResponseDto>> searchUsers(@RequestParam String name) {
+        return ResponseEntity.ok(dashboardService.searchUsers(name));
     }
 
     // http://localhost:8080/api/menu/dashboard/users/employees-count

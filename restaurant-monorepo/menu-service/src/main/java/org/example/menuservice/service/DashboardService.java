@@ -24,10 +24,9 @@ public class DashboardService {
         return orderServiceClient.getOrdersByClient(clientName);
     }
 
-    public List<UserResponseDto> getAllClients() {
-        return userServiceClient.getClients();
+    public List<UserResponseDto> searchUsers(String query) {
+        return userServiceClient.searchUsers(query);
     }
-
     public Long getEmployeeCount() {
         return userServiceClient.countEmployees();
     }
