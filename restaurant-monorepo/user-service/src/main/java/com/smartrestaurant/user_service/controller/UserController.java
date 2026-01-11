@@ -1,10 +1,9 @@
 package com.smartrestaurant.user_service.controller;
 
-
-import com.smartrestaurant.user_service.dto.CreateUserDTO;
-import com.smartrestaurant.user_service.dto.UserDTO;
+import com.smartrestaurant.user_service.client.MenuServiceClient;
+import com.smartrestaurant.user_service.client.OrderServiceClient;
+import com.smartrestaurant.user_service.dto.*;
 import com.smartrestaurant.user_service.service.IUserService;
-import com.smartrestaurant.user_service.service.UserServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -20,6 +20,10 @@ public class UserController {
 
     @Autowired
     private IUserService userService;
+    @Autowired
+    private MenuServiceClient menuServiceClient;
+    @Autowired
+    private OrderServiceClient orderServiceClient;
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
@@ -81,5 +85,34 @@ public class UserController {
     @GetMapping("/search/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
+    }
+
+    //http://localhost:8080/api/users/dashboard/categories
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/dashboard/categories")
+    public ResponseEntity<List<CategoryResponseDto>> getAllCategories() {
+        return ResponseEntity.ok(menuServiceClient.getAllCategories());
+    }
+
+    //http://localhost:8080/api/users/dashboard/dishes/filter?categoryId=2
+    //http://localhost:8080/api/users/dashboard/dishes/filter?availability=true
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/dashboard/dishes/filter")
+    public ResponseEntity<List<DishesResponseDto>> getFilteredDishes(@RequestParam(required = false) Integer categoryId, @RequestParam(required = false) Boolean availability) {
+        return ResponseEntity.ok(menuServiceClient.filterDishes(categoryId, availability));
+    }
+
+    //http://localhost:8080/api/users/dashboard/orders
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/dashboard/orders")
+    public ResponseEntity<List<OrderResponseDto>> getAllOrders() {
+        return ResponseEntity.ok(orderServiceClient.getAllOrders());
+    }
+
+    //http://localhost:8080/api/users/dashboard/large_orders
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/dashboard/large_orders")
+    public ResponseEntity<List<OrderResponseDto>> getLargeOrders(@RequestParam(defaultValue = "100.00")BigDecimal minTotal) {
+        return ResponseEntity.ok(orderServiceClient.getLargeOrders(minTotal));
     }
 }

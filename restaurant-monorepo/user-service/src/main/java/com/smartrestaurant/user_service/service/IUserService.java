@@ -13,9 +13,8 @@ public interface IUserService {
     UserDTO getUserById(Long id);
 
     List<UserDTO> getAllUsers(); //Read
-    UserDTO updateUser(Long id, UserDTO userDTO); //Update //Update
+    UserDTO updateUser(Long id, UserDTO userDTO); //Update
     boolean deleteUser(String email);  //Delete
-
 
     //Extra endpoints
     List<UserDTO> getClients();

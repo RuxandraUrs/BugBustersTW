@@ -1,5 +1,7 @@
 package com.smartrestaurant.user_service.service;
 
+import com.smartrestaurant.user_service.client.MenuServiceClient;
+import com.smartrestaurant.user_service.client.OrderServiceClient;
 import com.smartrestaurant.user_service.dto.CreateUserDTO;
 import com.smartrestaurant.user_service.dto.UserDTO;
 import com.smartrestaurant.user_service.entity.User;
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
