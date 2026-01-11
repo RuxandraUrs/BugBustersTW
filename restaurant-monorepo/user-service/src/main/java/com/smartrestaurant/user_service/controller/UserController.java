@@ -76,4 +76,10 @@ public class UserController {
         List<UserDTO> users = userService.findByName(name);
         return ResponseEntity.status(HttpStatus.OK).body(users);
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/search/{id}")
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
 }

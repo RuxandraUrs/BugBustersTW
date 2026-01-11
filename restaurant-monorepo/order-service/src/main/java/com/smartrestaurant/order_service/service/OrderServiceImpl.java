@@ -1,8 +1,8 @@
 package com.smartrestaurant.order_service.service;
 
-import com.smartrestaurant.order_service.dto.OrderDetailRequestDto;
-import com.smartrestaurant.order_service.dto.OrderRequestDto;
-import com.smartrestaurant.order_service.dto.OrderResponseDto;
+import com.smartrestaurant.order_service.client.MenuServiceClient;
+import com.smartrestaurant.order_service.client.UserServiceClient;
+import com.smartrestaurant.order_service.dto.*;
 import com.smartrestaurant.order_service.entity.Order;
 import com.smartrestaurant.order_service.entity.OrderDetail;
 import com.smartrestaurant.order_service.entity.OrderStatus;
@@ -20,20 +20,38 @@ import java.util.stream.Collectors;
 @Transactional
 public  class OrderServiceImpl implements IOrderService {
     private final OrderRepository orderRepository;
+    private final MenuServiceClient menuServiceClient;
+    private final UserServiceClient userServiceClient;
 
-    public OrderServiceImpl(OrderRepository orderRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository,
+                            MenuServiceClient menuServiceClient,
+                            UserServiceClient userServiceClient) {
         this.orderRepository = orderRepository;
+        this.menuServiceClient = menuServiceClient;
+        this.userServiceClient = userServiceClient;
     }
 
 
     @Override
     public OrderResponseDto createOrder(OrderRequestDto request) {
+
+        try {
+            userServiceClient.getUserById(request.getClientId());
+        } catch (Exception e) {
+            throw new NoSuchElementException("Client with  ID " + request.getClientId()  +" does not exist!");
+        }
+
         Order order = OrderMapper.toEntity(request);
 
-        BigDecimal total = calculateTotalPrice(request.getItems());
+        List<OrderDetail> details = mapDetailsRequestToEntity(request.getItems(), order);
+
+        order.setOrderDetails(details);
+        BigDecimal total = details.stream()
+                .map(OrderDetail::getPriceAtOrder)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         order.setTotalPrice(total);
         order.setStatus(OrderStatus.PLACED);
-        order.setOrderDetails(mapDetailsRequestToEntity(request.getItems(), order));
 
         Order savedOrder = orderRepository.save(order);
         return OrderMapper.toResponseDto(savedOrder);
@@ -100,6 +118,67 @@ public  class OrderServiceImpl implements IOrderService {
         return responseDto;
     }
 
+    @Override
+    public OrderDetailedResponseDto getOrderDetails(Long id) {
+        Order order  = orderRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Order not found " + id));
+
+        UserResponseDto userDto = userServiceClient.getUserById(order.getClientId());
+
+        List<String> dishNames = order.getOrderDetails().stream()
+                .map(detail -> {
+                    return menuServiceClient.getDishById(detail.getDishId()).getName();
+                })
+                .collect(Collectors.toList());
+
+        OrderDetailedResponseDto response = new OrderDetailedResponseDto();
+        response.setOrderId(order.getId());
+        response.setTotal(order.getTotalPrice());
+        response.setAddress(order.getDeliveryAddress());
+        response.setClientEmail(userDto.getEmail());
+        response.setDishNames(dishNames);
+
+        return response;
+    }
+
+    @Override
+    public List<OrderResponseDto> getOrdersByClientName(String name) {
+        List<UserResponseDto> users = userServiceClient.searchUsersByName(name);
+
+        if(users.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> userIds = users.stream()
+                .map(UserResponseDto::getId)
+                .toList();
+
+        return orderRepository.findAll().stream()
+                .filter(order -> userIds.contains(order.getClientId()))
+                .map(OrderMapper::toResponseDto)
+                .collect(Collectors.toList());
+
+    }
+
+    @Override
+    public List<OrderResponseDto> getOrdersByDishName(String dishName) {
+        List<DishResponseDto> dishes = menuServiceClient.searchDishesByName(dishName);
+
+        if (dishes.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> dishIds = dishes.stream()
+                .map(DishResponseDto::getId)
+                .map(Long::valueOf)
+                .toList();
+
+        return orderRepository.findAll().stream()
+                .filter(order -> order.getOrderDetails().stream()
+                        .anyMatch(detail -> dishIds.contains(detail.getDishId())))
+                .map(OrderMapper::toResponseDto)
+                .collect(Collectors.toList());
+    }
 
 
     @Override
@@ -142,11 +221,18 @@ public  class OrderServiceImpl implements IOrderService {
 
         return items.stream()
                 .map(itemReq -> {
+                    // 2. Apelam Menu Service pentru a gasi produsul real
+                    DishResponseDto dish = menuServiceClient.getDishById(itemReq.getDishId());
+
                     OrderDetail detail = new OrderDetail();
-                    detail.setDishId(itemReq.getDishId());
+                    detail.setDishId(Long.valueOf(dish.getId()));
                     detail.setQuantity(itemReq.getQuantity());
                     detail.setOrder(order);
-                    detail.setPriceAtOrder(BigDecimal.valueOf(10.00).multiply(BigDecimal.valueOf(itemReq.getQuantity())));
+
+
+                    BigDecimal itemTotal = dish.getPrice().multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+                    detail.setPriceAtOrder(itemTotal);
+
                     return detail;
                 })
                 .collect(Collectors.toList());

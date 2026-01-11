@@ -39,7 +39,7 @@ public class GatewayRoutesConfig {
                                 .addResponseHeader("X-Service", "order-service")
                                 .rewritePath("/restaurant/api/orders(?<segment>.*)", "/api/orders${segment}")
                         )
-                        .uri("lb://order"))
+                        .uri("lb://order-service"))
                 .route(p -> p
                         .path("/restaurant/api/users/**")
                         .filters(f -> f
