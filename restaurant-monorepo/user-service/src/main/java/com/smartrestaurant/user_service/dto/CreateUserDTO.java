@@ -1,6 +1,5 @@
 package com.smartrestaurant.user_service.dto;
 
-//import com.smartrestaurant.user_service.entity.Role;
 import com.smartrestaurant.user_service.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

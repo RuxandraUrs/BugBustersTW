@@ -1,7 +1,5 @@
 package com.smartrestaurant.user_service.service;
 
-import com.smartrestaurant.user_service.client.MenuServiceClient;
-import com.smartrestaurant.user_service.client.OrderServiceClient;
 import com.smartrestaurant.user_service.dto.CreateUserDTO;
 import com.smartrestaurant.user_service.dto.UserDTO;
 import com.smartrestaurant.user_service.entity.User;

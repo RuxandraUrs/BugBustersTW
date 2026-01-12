@@ -29,7 +29,8 @@ public class User {
     @Column(name="salary")
     private Float salary;
 
-    @Column(name="role")
+    @Enumerated(EnumType.ORDINAL)
+    @JoinColumn(name="role")
     private Role role;
 
     public User(String name, String email, String address, String phone, Role roleName, Float salary) {}

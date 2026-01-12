@@ -1,6 +1,5 @@
 package com.smartrestaurant.user_service.dto;
 
-import com.smartrestaurant.order_service.entity.OrderDetail;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -16,5 +15,5 @@ public class OrderResponseDto {
     private ZonedDateTime placementDate;
     private BigDecimal totalPrice;
     private String deliveryAddress;
-    private List<OrderDetail> orderDetails = new ArrayList<>();
+    private List<OrderDetailResponseDto> orderDetails = new ArrayList<>();
 }
