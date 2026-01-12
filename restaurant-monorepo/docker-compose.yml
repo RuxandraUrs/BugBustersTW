@@ -1,0 +1,164 @@
+version: '3.8'
+
+services:
+  # 1. ZIPKIN (TRACING)
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - restaurant-net
+
+  # 2. BAZA DE DATE (POSTGRESQL) - CU SALVARE DATE
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1q2w3e
+      - POSTGRES_DB=restaurant
+    # Aici este magia care salvează datele pe disc:
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - restaurant-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 3. EUREKA SERVER
+  eureka-server:
+    build: ./eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+      - EUREKA_CLIENT_FETCH_REGISTRY=false
+      # Configurare Zipkin
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0
+    networks:
+      - restaurant-net
+    depends_on:
+      - zipkin
+
+  # 4. USER SERVICE
+  user-service:
+    build: ./user-service
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/restaurant
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=1q2w3e
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      # Configurare Zipkin
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+      zipkin:
+        condition: service_started
+    networks:
+      - restaurant-net
+
+  # 5. ORDER SERVICE
+  order-service:
+    build: ./order-service
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/restaurant
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=1q2w3e
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      # Configurare Zipkin
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+      zipkin:
+        condition: service_started
+    networks:
+      - restaurant-net
+
+  # 6. MENU SERVICE (SCALAT X2)
+  menu-service:
+    build: ./menu-service
+    deploy:
+      replicas: 2
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SERVER_PORT=0
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/restaurant
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=1q2w3e
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      # Configurare Zipkin
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+      zipkin:
+        condition: service_started
+    networks:
+      - restaurant-net
+
+  # 7. GATEWAY (Profil SECURITY)
+  gateway-security:
+    build: ./api-gateway
+    image: gateway-image
+    profiles: ["security"]
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=security
+      # Google Auth din .env
+      - SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      # Configurare Zipkin
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0
+    depends_on:
+      - eureka-server
+      - zipkin
+    networks:
+      - restaurant-net
+
+  # 8. GATEWAY (Profil POSTMAN)
+  gateway-postman:
+    build: ./api-gateway
+    image: gateway-image
+    profiles: ["postman"]
+    ports:
+      - "8081:8080"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=default
+      # Configurare Zipkin
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0
+    depends_on:
+      - eureka-server
+      - zipkin
+    networks:
+      - restaurant-net
+
+networks:
+  restaurant-net:
+    driver: bridge
+
+# Definim volumul pentru date persistente
+volumes:
+  postgres_data:
