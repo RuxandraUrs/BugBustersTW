@@ -2,6 +2,7 @@ package com.smartrestaurant.api_gateway.auth;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -27,8 +28,19 @@ import java.util.Set;
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
 public class SecurityConfig {
-
     @Bean
+    @Profile("postman")
+    public SecurityWebFilterChain noSecurityFilterChain(ServerHttpSecurity http) {
+        return http
+                .csrf(csrf -> csrf.disable()) 
+                .authorizeExchange(exchange -> exchange
+                        .anyExchange().permitAll()
+                )
+                .build();
+    }
+    @Bean
+    @Profile("!postman") // Se activează oricând NU suntem pe profilul postman
+
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
