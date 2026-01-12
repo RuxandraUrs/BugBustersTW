@@ -16,7 +16,7 @@ services:
       - "5432:5432"
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=1q2w3e
+      - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=restaurant
     # Aici este magia care salvează datele pe disc:
     volumes:
@@ -52,7 +52,7 @@ services:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/restaurant
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=1q2w3e
+      - SPRING_DATASOURCE_PASSWORD=postgres
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       # Configurare Zipkin
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
@@ -74,7 +74,7 @@ services:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/restaurant
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=1q2w3e
+      - SPRING_DATASOURCE_PASSWORD=postgres
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       # Configurare Zipkin
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
@@ -117,7 +117,7 @@ services:
   # 7. GATEWAY (Profil SECURITY)
   gateway-security:
     build: ./api-gateway
-    image: gateway-image
+    image: gateway-security-image
     profiles: ["security"]
     ports:
       - "8080:8080"
@@ -139,7 +139,7 @@ services:
   # 8. GATEWAY (Profil POSTMAN)
   gateway-postman:
     build: ./api-gateway
-    image: gateway-image
+    image: gateway-postman-image
     profiles: ["postman"]
     ports:
       - "8081:8080"

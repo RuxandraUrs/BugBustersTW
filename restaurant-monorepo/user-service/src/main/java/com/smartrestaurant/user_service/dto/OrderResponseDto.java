@@ -1,7 +1,8 @@
 package com.smartrestaurant.user_service.dto;
 
-import com.smartrestaurant.order_service.entity.OrderDetail;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
@@ -16,5 +17,15 @@ public class OrderResponseDto {
     private ZonedDateTime placementDate;
     private BigDecimal totalPrice;
     private String deliveryAddress;
-    private List<OrderDetail> orderDetails = new ArrayList<>();
+    private List<OrderDetailDto> orderDetails = new ArrayList<>();
+
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class OrderDetailDto {
+        private Long dishId;
+        private Integer quantity;
+        private BigDecimal priceAtOrder;
+    }
 }
