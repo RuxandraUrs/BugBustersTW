@@ -11,7 +11,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
+/**
+ * Service implementation for managing menu categories.
+ * Handles persistence and validation logic for categories.
+ *
+ * @author Ruxandra Urs - 12.01.2026
+ * @version 1.0
+ */
 @Service
 public class CategoryServiceImpl implements ICategoryService {
 
@@ -24,6 +30,14 @@ public class CategoryServiceImpl implements ICategoryService {
     @Autowired
     private ModelMapper modelMapper;
 
+    /**
+     * Creates a new category while ensuring the name is unique.
+     *
+     * @param categoryDto the category data.
+     * @return CategoryDto the saved category.
+     * @throws IllegalStateException if a category name already exists.
+     * @author Ruxandra Urs - 12.01.2026
+     */
     @Override
     public CategoryDto createCategory(CategoryDto categoryDto) {
         categoryRepository.findByName(categoryDto.getName()).ifPresent(c -> {
@@ -35,20 +49,39 @@ public class CategoryServiceImpl implements ICategoryService {
         return modelMapper.map(savedCategory, CategoryDto.class);
     }
 
+    /**
+     * Retrieves all categories from the repository.
+     *
+     * @return List&lt;CategoryDto&gt; all categories.
+     * @author Ruxandra Urs-12.01.2026
+     */
     @Override
     public List<CategoryDto> getAllCategories() {
         return categoryRepository.findAll().stream()
                 .map(category -> modelMapper.map(category, CategoryDto.class))
                 .collect(Collectors.toList());
     }
-
+    /**
+     * Finds a category by its ID.
+     *
+     * @param id the category ID.
+     * @return CategoryDto the found category.
+     * @author Ruxandra Urs - 12.01.2026
+     */
     @Override
     public CategoryDto getCategoryById(Integer id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Category with ID " + id + " not found."));
         return modelMapper.map(category, CategoryDto.class);
     }
-
+    /**
+     * Updates an existing category name.
+     *
+     * @param id the ID of the category.
+     * @param categoryDto new name data.
+     * @return CategoryDto updated category.
+     * @author Ruxandra Urs- 12.01.2026
+     */
     @Override
     public CategoryDto updateCategory(Integer id, CategoryDto categoryDto) {
         Category existingCategory = categoryRepository.findById(id)
@@ -58,7 +91,13 @@ public class CategoryServiceImpl implements ICategoryService {
         Category updatedCategory = categoryRepository.save(existingCategory);
         return modelMapper.map(updatedCategory, CategoryDto.class);
     }
-
+    /**
+     * Deletes a category if it has no associated dishes.
+     *
+     * @param id the category ID.
+     * @throws IllegalStateException if category is still associated with dishes.
+     * @author Ruxandra Urs - 12.01.2026
+     */
     @Override
     public void deleteCategory(Integer id) {
         if (!categoryRepository.existsById(id)) {

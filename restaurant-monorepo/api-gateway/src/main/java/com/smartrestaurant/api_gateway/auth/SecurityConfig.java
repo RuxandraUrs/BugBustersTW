@@ -32,14 +32,14 @@ public class SecurityConfig {
     @Profile("postman")
     public SecurityWebFilterChain noSecurityFilterChain(ServerHttpSecurity http) {
         return http
-                .csrf(csrf -> csrf.disable()) 
+                .csrf(csrf -> csrf.disable())
                 .authorizeExchange(exchange -> exchange
                         .anyExchange().permitAll()
                 )
                 .build();
     }
     @Bean
-    @Profile("!postman") // Se activează oricând NU suntem pe profilul postman
+    @Profile("!postman")
 
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         http

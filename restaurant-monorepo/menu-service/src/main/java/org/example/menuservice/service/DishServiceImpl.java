@@ -17,7 +17,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+/**
+ * Implementation of the Dish management service.
+ * Handles business logic for menu items, including category and ingredient associations.
+ *
+ * @author Ruxandra Urs
+ * @version 1.0 -12.01.2026
+ */
 @Service
 public class DishServiceImpl implements IDishService {
 
@@ -33,6 +39,14 @@ public class DishServiceImpl implements IDishService {
     @Autowired
     private ModelMapper modelMapper;
 
+    /**
+     * Creates a new dish and automatically handles ingredient persistence and category linking.
+     *
+     * @param dishDto the data transfer object containing dish details.
+     * @return DishDto the persisted dish with generated ID and mapped associations.
+     * @throws EntityNotFoundException if the associated category ID is invalid.
+     * @author Ruxandra Urs - 12.01.2026
+     */
     @Override
     @Transactional
     public DishDto createDish(DishDto dishDto) {
@@ -57,7 +71,12 @@ public class DishServiceImpl implements IDishService {
 
         return convertToDto(savedDish);
     }
-
+    /**
+     * Retrieves all dishes from the database including their category details.
+     *
+     * @return List&lt;DishDto&gt; a list of all dishes.
+     * @author Ruxandra Urs - 12.01.2026
+     */
     @Override
     @Transactional(readOnly = true)
     public List<DishDto> getAllDishes() {
@@ -66,7 +85,14 @@ public class DishServiceImpl implements IDishService {
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
-
+    /**
+     * Retrieves a single dish by its unique identifier.
+     *
+     * @param id the unique ID of the dish.
+     * @return DishDto the found dish data.
+     * @throws EntityNotFoundException if no dish exists with the given ID.
+     * @author Ruxandra Urs - 12.01.2026
+     */
     @Override
     @Transactional(readOnly = true)
     public DishDto getDishById(Integer id) {
@@ -74,7 +100,14 @@ public class DishServiceImpl implements IDishService {
                 .orElseThrow(() -> new EntityNotFoundException("Dish with ID " + id + " not found."));
         return convertToDto(dish);
     }
-
+    /**
+     * Updates an existing dish with new details and validates associations.
+     *
+     * @param id the ID of the dish to update.
+     * @param dishDto the new data to apply.
+     * @return DishDto the updated dish.
+     * @author Ruxandra Urs - 12.01.2026
+     */
     @Override
     @Transactional
     public DishDto updateDish(Integer id, DishDto dishDto) {
@@ -99,7 +132,13 @@ public class DishServiceImpl implements IDishService {
         Dish updatedDish = dishRepository.save(existingDish);
         return convertToDto(updatedDish);
     }
-
+    /**
+     * Deletes a dish from the repository based on its ID.
+     *
+     * @param id the ID of the dish to delete.
+     * @throws EntityNotFoundException if the ID is not found.
+     * @author Ruxandra Urs - 12.01.2026
+     */
     @Override
     @Transactional
     public void deleteDish(Integer id) {
@@ -109,6 +148,13 @@ public class DishServiceImpl implements IDishService {
         dishRepository.deleteById(id);
     }
 
+    /**
+     * Searches for dishes by name using a partial match (ignore case).
+     *
+     * @param name the substring to search for.
+     * @return List&lt;DishDto&gt; matching dishes.
+     * @author Ruxandra Urs - 12.01.2026
+     */
     @Override
     @Transactional(readOnly = true)
     public List<DishDto> searchDishByName(String name) {
@@ -117,7 +163,14 @@ public class DishServiceImpl implements IDishService {
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
-
+    /**
+     * Filters dishes based on category identifier and availability status.
+     *
+     * @param categoryId the ID of the category.
+     * @param availability the status of the dish.
+     * @return List&lt;DishDto&gt; filtered dishes.
+     * @author Ruxandra Urs - 12.01.2026
+     */
     @Override
     @Transactional(readOnly = true)
     public List<DishDto> filterDishes(Integer categoryId, Boolean availability) {
@@ -126,7 +179,14 @@ public class DishServiceImpl implements IDishService {
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
-
+    /**
+     * Retrieves dishes sorted by a specified field and direction.
+     *
+     * @param sortBy field to sort by.
+     * @param order "asc" or "desc".
+     * @return List&lt;DishDto&gt; sorted list of dishes.
+     * @author Ruxandra Urs - 12.01.2026
+     */
     @Override
     @Transactional(readOnly = true)
     public List<DishDto> getDishesSortedBy(String sortBy, String order) {
@@ -139,7 +199,13 @@ public class DishServiceImpl implements IDishService {
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
-
+    /**
+     * Utility method to convert a Dish entity to a DishDto.
+     *
+     * @param dish the entity to convert.
+     * @return DishDto the converted data object.
+     * @author Ruxandra Urs - 12.01.2026
+     */
     private DishDto convertToDto(Dish dish) {
         DishDto dishDto = modelMapper.map(dish, DishDto.class);
 
