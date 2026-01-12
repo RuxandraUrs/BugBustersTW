@@ -17,15 +17,5 @@ public class OrderResponseDto {
     private ZonedDateTime placementDate;
     private BigDecimal totalPrice;
     private String deliveryAddress;
-    private List<OrderDetailDto> orderDetails = new ArrayList<>();
-
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class OrderDetailDto {
-        private Long dishId;
-        private Integer quantity;
-        private BigDecimal priceAtOrder;
-    }
+    private List<OrderDetailResponseDto> orderDetails = new ArrayList<>();
 }
